@@ -1,0 +1,10 @@
+.gitignore
+
+# rubbish
+**/__init__.py
+**__pycache__/
+/.venv
+/.vscode
+
+# secrets
+.env
