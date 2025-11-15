@@ -1,15 +1,35 @@
 import socket
+from json_system import writefile
+import time
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # создаем сокет
-sock.connect(('localhost', 55000))  # подключаемся к серверному сокету
-file = "packets/example.json"
+
+
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(('localhost', 55000))
+
 while True:
-    inputed = input()
+    inputed = input("Введите сообщение: ")
     if inputed == "отсоединение":
-        sock.close()  # закрываем соединение
+        sock.close()
         break
-    sock.send(bytes(file, encoding='UTF-16'))  # отправляем сообщение
-    with open(file, "rb") as f:
 
-        data = sock.recv(1024)  # читаем ответ от серверного сокета
-    print(data.decode('UTF-16'))
+    t = time.time()
+    filename = f"{t}.json"
+    print(f"{t} - время отправки")
+    filepath = writefile(f"send{t}", "message", "test", "test2", inputed + "艾")
+
+    # Отправляем имя файла
+    sock.send(filename.encode("UTF-8"))
+
+    # Отправляем содержимое файла
+    with open(filepath, "rb") as f:
+        while True:
+            data = f.read(1024)
+            if not data:
+                sock.close()
+                break
+            sock.send(data)
+
+
+    print("Сообщение отправлено")

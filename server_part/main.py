@@ -1,16 +1,33 @@
 import socket
-from json_system import readfile
+import os
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Создание сокета
-sock.bind(('', 55000))  # Связывание сокета с портом, где он будет ожидать сообщения
-sock.listen(10)  # Сколько может принимать сообщений
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.bind(('', 55000))
+sock.listen(10)
 print("Тестовый сервер запущен. Нажмите Ctrl+C для выключения")
-print(readfile("example"))
+
+# Создаем папку если нет
+os.makedirs("packets", exist_ok=True)
 
 while True:
     conn, addr = sock.accept()
     print("Соединено: ", addr)
-    data = conn.recv(1024)  # Получение пакетов данных от юзера, по 1024 байт
-    print(f"Получено: {data.decode('UTF-16')}")
-    conn.send(data)
-    conn.close()
+
+    try:
+        # Получаем имя файла
+        filename = conn.recv(1024).decode("UTF-8").strip()
+        print(f"Получение файла: {filename}")
+
+        file = open("packets/" + filename, "wb")
+        while True:
+            data = conn.recv(1024)
+            if "艾" in data:
+                break
+            file.write(data)
+        file.close()
+        print("Пакет получен")
+
+    except Exception as e:
+        print(f"Ошибка: {e}")
+    finally:
+        conn.close()
